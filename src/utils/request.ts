@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus';
 let request = axios.create({
     //基础路径
     // baseURL: `${import.meta.env.VITE_API_URL}`,
-    baseURL: "localhost:8080",
+    baseURL: "http://localhost:8080",
     timeout: 5000
 });
 
@@ -27,34 +27,36 @@ request.interceptors.response.use(
     },
     //失败的回调
     (error) => {
-        //处理http网络错误
-        //存储错误信息
+        // 处理 http 网络错误
+        // 存储错误信息
         let message = '';
-        let status = error.response.state;
+        // 修正为使用 status 获取响应状态码
+        let status = error.response? error.response.status : null;
         switch (status) {
             case 401:
-                message = 'TOKEN过期'
+                message = 'TOKEN 过期';
                 break;
             case 403:
-                message = '无权访问'
+                message = '无权访问';
                 break;
             case 404:
-                message = '请求地址错误'
+                message = '请求地址错误';
                 break;
             case 500:
-                message = '服务器出问题'
+                message = '服务器出问题';
                 break;
             default:
-                message = '网络出问题了'
+                message = '网络出问题了';
         }
+        // 假设 ElMessage 是一个消息提示组件
         ElMessage({
-            type:'error',
+            type: 'error',
             message,
             grouping: true,
         });
-
-        return Promise.reject(error)
+    
+        return Promise.reject(error);
     })
-
-    //对外暴露
-    export default request;
+    
+    // 对外暴露
+export default request;

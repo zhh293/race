@@ -109,18 +109,24 @@ const registerHandler = async () => {
 
   try {
     const response = await request.post('/user/register', ruleForm);
-    if (response.code === 200) {
-      localStorage.setItem('token', response.data.token)
-      alert('注册成功，请登录')
-      router.push('/login')
-    } else {
-      alert(response.msg)
+    if (response) {
+          if (response.code === 200) {
+            localStorage.setItem('token', response.data.token);
+            alert('注册成功，请登录');
+            this.$router.push('/login');
+          } else {
+            alert(response.msg);
+          }
+        } else {
+          console.error('未收到有效的响应');
+          alert('注册失败，请重试');
+        }
+      } catch (error) {
+        console.error('注册失败:', error);
+        alert('注册失败，请重试');
+      }
     }
-  } catch (error) {
-    console.error('注册失败:', error);
-    alert('注册失败，请重试');
-  }
-}
+
 </script>
   
 <style scoped>
