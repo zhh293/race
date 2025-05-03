@@ -22,4 +22,5 @@ public class user implements Serializable {
     private LocalDateTime loginTime;
     private LocalDateTime logoutTime;
     private LocalDateTime updateAt;
+    private String email;
 }

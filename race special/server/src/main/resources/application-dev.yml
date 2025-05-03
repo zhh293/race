@@ -23,7 +23,7 @@ race:
     request-url: https://api-ai.vivo.com.cn/api/v1/task_progress
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    host: 10.9.29.24
+    host: localhost
     port: 3306
     database: sky_take_out
     username: root

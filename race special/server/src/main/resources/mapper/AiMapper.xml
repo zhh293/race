@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.example.server.mapper.AiMapper">
+    <insert id="insertNewUser">
+        insert into raceuser <set>
+        <if test="username!=null and username!='' ">
+            ,username=#{username}
+        </if>
+        <if test="password!=null and password!='' ">
+            ,password=#{password}
+        </if>
+        <if test="email!=null and email!='' ">
+             ,email=#{email}
+        </if>
+        <if test="name!=null and name!='' ">
+            ,name=#{name}
+        </if>
+        <if test="count!=null and count!='' ">
+            ,count=#{count}
+        </if>
+        <if test="loginTime!=null and loginTime!='' ">
+            ,login_time=#{loginTime}
+        </if>
+        <if test="logoutTime!=null and logoutTime!='' ">
+            ,logout_time=#{logoutTime}
+        </if>
+        <if test="updatedAt!=null and updatedAt!='' ">
+            ,updated_at=#{updateAt}
+        </if>
+    </set>
+    </insert>
+
+    <select id="login" resultType="org.example.pojo.entity.user">
+        select * from raceuser <where>
+        <if test="username!=null and username!='' ">
+            and username=#{username}
+        </if>
+        <if test="password!=null and password!='' ">
+            and password=#{password}
+        </if>
+        <if test="email!=null and email!= '' ">
+            and email=#{email}
+        </if>
+    </where>
+    </select>
+</mapper>
