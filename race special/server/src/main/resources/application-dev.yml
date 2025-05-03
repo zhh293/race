@@ -1,0 +1,35 @@
+race:
+  deepseek:
+    api-key: sk-b6baa9fc68b742f780fc9b64f4635868
+    api-key1: sk-d88586a4d04744c2a0fea3a0e2841aca
+    deep-seek-url: https://api.deepseek.com/chat/completions
+    tong-ying-url: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+    app-id: 2025158089
+    app-key: FIKXhKoeMNzWSCLV
+    http-method: POST
+    http-url: /vivogpt/completions
+    request-url: https://api-ai.vivo.com.cn/vivogpt/completions
+  picture:
+    app-id: 2025158089
+    app-key: FIKXhKoeMNzWSCLV
+    http-method: POST
+    http-url: /api/v1/task_submit
+    request-url: https://api-ai.vivo.com.cn/api/v1/task_submit
+  querypicture:
+    app-id: 2025158089
+    app-key: FIKXhKoeMNzWSCLV
+    http-method: POST
+    http-url: /api/v1/task_progress
+    request-url: https://api-ai.vivo.com.cn/api/v1/task_progress
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: 10.9.29.24
+    port: 3306
+    database: sky_take_out
+    username: root
+    password: zhang20061023@
+  redis:
+    host: localhost
+    port: 6379
+    #password: 123456
+    database: 0

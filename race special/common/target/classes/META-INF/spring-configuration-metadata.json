@@ -1,0 +1,154 @@
+{
+  "groups": [
+    {
+      "name": "race.deepseek",
+      "type": "org.example.properties.AiProperties",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.jwt",
+      "type": "org.example.properties.JwtProperties",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.picture",
+      "type": "org.example.properties.AiPictureProperties",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.querypicture",
+      "type": "org.example.properties.AiQueryPictureProperties",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "race.deepseek.api-key",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.api-key1",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.app-id",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.app-key",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.deep-seek-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.http-method",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.http-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.request-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.deepseek.tong-ying-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiProperties"
+    },
+    {
+      "name": "race.jwt.admin-secret-key",
+      "type": "java.lang.String",
+      "description": "管理端员工生成jwt令牌相关配置",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.jwt.admin-token-name",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.jwt.admin-ttl",
+      "type": "java.lang.Long",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.jwt.user-secret-key",
+      "type": "java.lang.String",
+      "description": "用户端微信用户生成jwt令牌相关配置",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.jwt.user-token-name",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.jwt.user-ttl",
+      "type": "java.lang.Long",
+      "sourceType": "org.example.properties.JwtProperties"
+    },
+    {
+      "name": "race.picture.app-id",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.picture.app-key",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.picture.http-method",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.picture.http-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.picture.request-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiPictureProperties"
+    },
+    {
+      "name": "race.querypicture.app-id",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    },
+    {
+      "name": "race.querypicture.app-key",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    },
+    {
+      "name": "race.querypicture.http-method",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    },
+    {
+      "name": "race.querypicture.http-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    },
+    {
+      "name": "race.querypicture.request-url",
+      "type": "java.lang.String",
+      "sourceType": "org.example.properties.AiQueryPictureProperties"
+    }
+  ],
+  "hints": []
+}

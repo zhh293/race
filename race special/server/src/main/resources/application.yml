@@ -1,0 +1,67 @@
+
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${race.datasource.driver-class-name}
+      url: jdbc:mysql://${race.datasource.host}:${race.datasource.port}/${race.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${race.datasource.username}
+      password: ${race.datasource.password}
+  redis:
+    host: ${race.redis.host}
+    port: ${race.redis.port}
+    password: ${race.redis.password}
+    database: ${race.redis.database}
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: org.example.entity
+  configuration:
+    map-underscore-to-camel-case: true
+#mapper配置文件
+logging:
+  level:
+   org:
+      example:
+        mapper: debug
+        service: info
+        controller: info
+race:
+  jwt:
+    admin-ttl: 7200000000000000000
+    # 设置前端传递过来的令牌名称
+    user-secret-key: itheima
+    user-ttl: 7200000000000
+    user-token-name: authentication
+    admin-token-name: token
+    admin-secret-key: itcast
+  deepseek:
+    api-key: ${sky.deepseek.api-key}
+    api-key1: ${sky.deepseek.api-key1}
+    deep-seek-url: ${sky.deepseek.deep-seek-url}
+    tong-ying-url: ${sky.deepseek.tong-ying-url}
+    app-id: ${race.deepseek.app-id}
+    app-key: ${race.deepseek.app-key}
+    http-method: ${race.deepseek.http-method}
+    http-url: ${race.deepseek.http-url}
+    request-url: ${race.deepseek.request-url}
+  picture:
+    app-id: ${race.picture.app-id}
+    app-key: ${race.picture.app-key}
+    http-method: ${race.picture.http-method}
+    http-url: ${race.picture.http-url}
+    request-url: ${race.picture.request-url}
+  querypicture:
+    app-id: ${race.querypicture.app-id}
+    app-key: ${race.querypicture.app-key}
+    http-method: ${race.querypicture.http-method}
+    http-url: ${race.querypicture.http-url}
+    request-url: ${race.querypicture.request-url}
+springfox:
+  documentation:
+    enabled: false
