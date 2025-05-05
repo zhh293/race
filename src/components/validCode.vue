@@ -24,7 +24,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['input']);
+const emit = defineEmits(['update:modelValue']);
 
 const codeList = ref([]);
 
@@ -50,7 +50,8 @@ const createdCode = () => {
   }
 
   codeList.value = newCodeList;
-  emit('input', newCodeList.map(item => item.code).join(''));
+  // 修改触发事件为 update:modelValue
+  emit('update:modelValue', newCodeList.map(item => item.code).join(''));
 };
 
 const refreshCode = () => {

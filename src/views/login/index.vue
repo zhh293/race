@@ -25,7 +25,7 @@
 
                 <el-form-item label="验证码" prop="validCode">
                 <el-input v-model="ruleForm.validCode"/> 
-                <ValidCodeComponent v-model:validCode="captcha" style="display: flex; background-color: paleturquoise; margin-top: 3px; margin-left: 70%;"/>
+                <ValidCodeComponent v-model="captcha" style="display: flex; background-color: paleturquoise; margin-top: 3px; margin-left: 70%;"/>
                 </el-form-item>
 
                 <div style="display: flex; margin-top: 8px; justify-content: center;">
