@@ -1,7 +1,7 @@
 <template>
     <div class="placeHolder" style="display: flex; height: 100vh; width: 100%; align-items: center; justify-items: center;">
         <div class="imgPlaceHolder" style="display: flex; width: 500px; height: 50%; background-color: pink; border-radius: 10px; align-items: center; justify-content: center; justify-items: center; margin-left: 15%;">
-            <img src="" alt="login">
+          <img src="@/assets/register.png" alt="register" style="display: flex; width: 98%; height: 98%; border-radius: 10px; align-items: center; justify-content: center; justify-items: center;"/>
         </div>
         <div class="formPlaceHolder" style="display: flex; width: 500px; margin-right: 15%;">
             <el-form
@@ -33,10 +33,6 @@
                 </div>            
 
             </el-form>
-
-
-         
-
         </div>
     </div>
 </template>
@@ -47,6 +43,8 @@ import { RowAlign, type FormInstance, type FormRules } from 'element-plus'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import request from '@/utils/request'
+import type { loginForm, userResponseData } from '@/api/user/type'
+import { reqRegiter } from '@/api/user'
 
 interface RuleForm {
   name: string
@@ -63,31 +61,31 @@ const ruleForm = reactive<RuleForm>({
   passwordConfirm: '',
 })
 
-const validatePassword = (rule, value, callback) => {
+const validatePassword = (rule: any, value: string, callback: (arg0: Error | undefined) => void) => {
   if (value === '') {
     callback(new Error('请确认密码'));
   } else if (value !== ruleForm.password) {
     callback(new Error('两次输入的密码不一致'));
   } else {
-    callback();
+    callback(undefined);
   }
 }
 
 const rules = reactive<FormRules<RuleForm>>({
   name: [
-    { required: true, message: 'Please input 用户名', trigger: 'blur' },
+    { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' },
   ],
   password: [
-    { required: true, message: 'Please input 密码', trigger: 'blur' },
+    { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 16, message: 'Length should be 6 to 16', trigger: 'blur' },
   ],
   passwordConfirm: [
     { validator: validatePassword, trigger: 'blur' },
   ],
   email: [
-    { required: true, message: 'Please input 邮箱', trigger: 'blur' },
-    { min: 1, max: 20, message: '请输入正确的邮箱', trigger: 'blur' },
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' },
   ],
 
 })
@@ -102,31 +100,35 @@ const registerHandler = async () => {
   // 表单验证
   await ruleFormRef.value.validate((valid) => {
     if (!valid) {
-      console.log('验证失败')
-      return false
+      console.log('验证失败');
     }
   })
 
+  // 提交注册请求
+  const registerData: loginForm = {
+    username: ruleForm.name,
+    password: ruleForm.password,
+    email: ruleForm.email,
+  }
   try {
-    const response = await request.post('/user/register', ruleForm);
+    const response: userResponseData =  await reqRegiter(registerData);
     if (response) {
           if (response.code === 200) {
-            localStorage.setItem('token', response.data.token);
             alert('注册成功，请登录');
-            this.$router.push('/login');
+            router.push('/login');
           } else {
-            alert(response.msg);
+            alert(response.message);
           }
         } else {
           console.error('未收到有效的响应');
           alert('注册失败，请重试');
         }
-      } catch (error) {
-        console.error('注册失败:', error);
-        alert('注册失败，请重试');
-      }
+  } catch (error) {
+      console.error('注册失败:', error);
+      alert('注册失败，请重试');
     }
-
+        
+}
 </script>
   
 <style scoped>
