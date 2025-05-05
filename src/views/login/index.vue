@@ -1,7 +1,7 @@
 <template>
     <div class="placeHolder" style="display: flex; height: 100vh; width: 100%; align-items: center; justify-items: center;">
         <div class="imgPlaceHolder" style="display: flex; width: 500px; height: 50%; background-color: pink; border-radius: 10px; align-items: center; justify-content: center; justify-items: center; margin-left: 15%;">
-            <img src="" alt="login">
+            <img src="@/assets/login.png" alt="login" style="display: flex; width: 98%; height: 98%; border-radius: 10px; align-items: center; justify-content: center; justify-items: center;"/>
         </div>
         <div class="formPlaceHolder" style="display: flex; width: 500px; margin-right: 15%;">
             <el-form
@@ -25,7 +25,7 @@
 
                 <el-form-item label="验证码" prop="validCode">
                 <el-input v-model="ruleForm.validCode"/> 
-                <ValidCode v-model:validCode="captcha" style="display: flex; background-color: paleturquoise; margin-top: 3px; margin-left: 70%;"/>
+                <ValidCodeComponent v-model:validCode="captcha" style="display: flex; background-color: paleturquoise; margin-top: 3px; margin-left: 70%;"/>
                 </el-form-item>
 
                 <div style="display: flex; margin-top: 8px; justify-content: center;">
@@ -43,12 +43,14 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, type Component } from 'vue'
 import { RowAlign, type FormInstance, type FormRules } from 'element-plus'
-import ValidCode from '@/components/vaildCode.vue'
+import ValidCodeComponent from '@/components/validCode.vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import request from '@/utils/request'
+import type { loginForm, userResponseData } from '@/api/user/type'
+import { reqLogin } from '@/api/user'
 
 
 interface RuleForm {
@@ -67,28 +69,28 @@ const ruleForm = reactive<RuleForm>({
 })
 const captcha = ref('')
 
-const validCode = (rule,value, callback) => {
+const validCode = (rule: any, value: string, callback: any) => {
   if (value === '') {
     callback(new Error('请输入验证码'))
   } else if (value !== captcha.value) {
     callback(new Error('验证码错误'))
+    console.log(value, captcha.value)
   } else {
     callback()
   }
 }
-
 const rules = reactive<FormRules<RuleForm>>({
   name: [
-    { required: true, message: 'Please input 用户名', trigger: 'blur' },
+    { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' },
   ],
   password: [
-    { required: true, message: 'Please input 密码', trigger: 'blur' },
+    { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 16, message: 'Length should be 6 to 16', trigger: 'blur' },
   ],
   email: [
-    { required: true, message: 'Please input 邮箱', trigger: 'blur' },
-    { min: 1, max: 20, message: '请输入正确的邮箱', trigger: 'blur' },
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' },
   ],
   validCode: [
     {validator: validCode, trigger: 'blur'}
@@ -109,25 +111,21 @@ const loginHandler = async () => {
   await ruleFormRef.value.validate((valid) => {
     if (!valid) {
       console.log('验证失败')
-      return false
     }
   })
 
   const loginData: loginForm = {
     username: ruleForm.name,
-    password: ruleForm.password
-  };
+    password: ruleForm.password,
+    email: ruleForm.email,
+  }
 
   try {
     const response: userResponseData = await reqLogin(loginData);
     if (response.code === 200) {
       // 验证验证码
-      if (ruleForm.validCode === captcha.value) {
-        localStorage.setItem('token', response.data.token);
-        router.push('/home');
-      } else {
-        alert('验证码错误，请重新输入');
-      }
+      router.push('/home')
+      console.log(response.message)
     } else {
       alert('用户名或密码错误');
     }
