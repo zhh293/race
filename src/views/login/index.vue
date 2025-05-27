@@ -124,7 +124,7 @@ const loginHandler = async () => {
     const response: userResponseData = await reqLogin(loginData);
     if (response.code === 200) {
       // 验证验证码
-      router.push('/home')
+      router.push('/')
       console.log(response.message)
     } else {
       alert('用户名或密码错误');

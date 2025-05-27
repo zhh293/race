@@ -56,7 +56,7 @@
                         {{ thisTimeState }}
                     </span>
 
-                    <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
+                    <span @click="handleFullscreen" style="display: flex; width: 50%; justify-items: right; justify-content: right;">
                         <span style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
@@ -65,16 +65,23 @@
                 </div>
             </el-header>
 
-            <el-carousel
-                height="600px"
-                direction="vertical"
-                type="card"
-                :autoplay="true"
-            >
-                <el-carousel-item v-for="key in item" :key="item">
-                <h3 text="2xl" justify="center">{{ key }}</h3>
-                </el-carousel-item>
-            </el-carousel>
+            <div style="display: flex; width: 100%; height: 100%; align-items: flex-end;">
+                <div style=" width: 80%; padding-bottom: 0; margin-bottom: 10%; height: 50%; margin-right: 10%;">
+                    <el-input clearable v-model="text" type="textarea" 
+                            style="display: flex; width: 100%; height: 30%; margin-bottom: 5%; border-width: 2px;" 
+                            placeholder="来制定你的计划吧" 
+                            :autosize="{ minRows: 3, maxRows: 6 }"
+                            @keyup.enter="handleEnter">
+                    </el-input>
+
+                    <div style="display: flex; width: 100%; justify-content: right;">
+                        <el-button style="display: flex; margin-right: 5%;" type="primary" plain round @click="submitClick">
+                            <el-icon style="color: blue;"><Upload /></el-icon>
+                        </el-button>
+                    </div>
+
+                </div>
+            </div>
 
 
 
@@ -89,6 +96,7 @@
 import { onMounted, ref } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
+import router from '@/router'
 
   const isCollapse = ref(false)
   const handleOpen = (key: string, keyPath: string[]) => {
@@ -105,14 +113,34 @@ onMounted(() => {
   thisTimeState.value = timeState || ''
   console.log(thisTimeState.value)
 })
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
 
-const item = [
-    ['在蓝心小V里你可以问问AI该怎么制定计划'],
-    ["如果你不开心，你也可以在AI原子能力里面和AI聊天"],
-    ["如果你想听听音乐，也可以和AI探讨音乐世界的美丽，他也许会帮你制作哦"],
-    ["在我的计划里面你可以清楚的查看到每一次AI为你制定的计划，你也可以自定义"],
-    ["个人中心里面我们会为您统计您的计划安排和生活，有更加针对化的建议哦"]
-]
+const text = ref()
+const handleEnter = (event: KeyboardEvent) => {
+  // 如果按下Shift+Enter则插入换行
+  if (event.shiftKey) {
+    return
+  }
+  // 否则阻止默认行为（不换行）
+  event.preventDefault()
+}
+
+const submitClick = () => {
+    if(text.value.trim() == 0) {
+        ElMessage.warning("请输入东西哦亲")
+    }else{
+
+    }
+
+
+
+
+    ElMessage.success("正在为您生成计划")
+} 
+
 
 </script>
 
@@ -130,22 +158,5 @@ const item = [
     padding-top: 0.8%;
     margin-left: 0;
     padding-left: 0;
-}
-.el-carousel__item h3 {
-  color: #475669;
-  opacity: 0.80;
-  line-height: 300px;
-  margin: 0;
-  text-align: center;
-  margin-left: 0;
-  padding-left: 0;
-}
-
-.el-carousel__item:nth-child(2n) {
-  background-color: #99a9bf;
-}
-
-.el-carousel__item:nth-child(2n + 1) {
-  background-color: #d3dce6;
 }
 </style>

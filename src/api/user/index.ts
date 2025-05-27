@@ -4,7 +4,7 @@ import { type loginForm ,type userResponseData} from '@/api/user/type';
 
 //统一管理接口
 enum API{
-    LOGIN_URL = "/user/login",
+    LOGIN_URL = "/login",
     REGISTER_URL = "/user/register"
 }
 //对外暴露请求函数
