@@ -117,7 +117,7 @@ const registerHandler = async () => {
             alert('注册成功，请登录');
             router.push('/login');
           } else {
-            alert(response.message);
+            alert(response.msg);
           }
         } else {
           console.error('未收到有效的响应');

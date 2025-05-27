@@ -9,4 +9,7 @@ export interface loginForm{
 export interface userResponseData {
     code:number,
     msg:string
+    data: {
+        userId: number,
+    }
 }

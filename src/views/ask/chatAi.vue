@@ -120,8 +120,12 @@ import { ElMessage } from 'element-plus'
 import router from '@/router'
 import axios from 'axios'
 import { reqAiChat } from '@/api/interface'
+import { useUserStore } from '@/stores/modules/user'
 
-const baseURL = ''
+// 获取用户状态
+const userStore = useUserStore()
+const userId = ref(userStore.userId)
+
 
 //侧边栏开合
 const isCollapse = ref(false)
@@ -156,22 +160,26 @@ const handleEnter = (event: KeyboardEvent) => {
 const backThing = ref()
 const userThing = ref()
 watch(userThing, async (newValue) => {
-  if (newValue.trim()) {
+  if (newValue && newValue.question.trim() && newValue.userId !== null) {
     backThing.value = '思考中...'
-    backThing.value = await reqAiChat(newValue.trim())
-      .then((res) => {
-        if (res.code === 200) {
-          return res.Respond
-        } else {
-          ElMessage.error('请求失败，请稍后再试')
-          return '请求失败，请稍后再试'
-        }
+    try {
+      // 发送包含userId和问题的请求
+      const res = await reqAiChat({
+        question: newValue.question,
+        userId: newValue.userId
       })
-      .catch((error) => {
-        console.error('请求错误:', error)
-        ElMessage.error('请求错误，请稍后再试')
-        return '请求错误，请稍后再试'
-      })
+      
+      if (res.code === 200) {
+        backThing.value = res.Respond
+      } else {
+        ElMessage.error('请求失败，请稍后再试')
+        backThing.value = '请求失败，请稍后再试'
+      }
+    } catch (error) {
+      console.error('请求错误:', error)
+      ElMessage.error('请求错误，请稍后再试')
+      backThing.value = '请求错误，请稍后再试'
+    }
   }
 })
 const submitClick = (): void => {
@@ -181,7 +189,11 @@ const submitClick = (): void => {
     return
   }
   
-  userThing.value = inputValue
+  // 构造包含userId的请求数据
+  userThing.value = {
+    question: inputValue,
+    userId: userId.value
+  }
   text.value = ''
   isShow.value = true
 }

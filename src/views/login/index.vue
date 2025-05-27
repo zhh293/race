@@ -125,7 +125,7 @@ const loginHandler = async () => {
     if (response.code === 200) {
       // 验证验证码
       router.push('/')
-      console.log(response.message)
+      console.log(response.msg)
     } else {
       alert('用户名或密码错误');
     }

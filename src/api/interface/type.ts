@@ -1,9 +1,10 @@
 //AI接口参数
 export interface aiChatForm {
-    answer: string;
+    question: string,
+    userId: number
 }
 
 export interface aiResponseData {
-    code:number,
-    Respond:string
+    code: number,
+    Respond: string
 }
