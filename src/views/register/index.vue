@@ -41,10 +41,8 @@
 import { reactive, ref } from 'vue'
 import { RowAlign, type FormInstance, type FormRules } from 'element-plus'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
-import request from '@/utils/request'
-import type { loginForm, userResponseData } from '@/api/user/type'
-import { reqRegiter } from '@/api/user'
+import type { registerForm, userRegisterResponseData } from '@/api/user/register/type'
+import { reqRegiter } from '@/api/user/register'
 
 interface RuleForm {
   name: string
@@ -105,28 +103,23 @@ const registerHandler = async () => {
   })
 
   // 提交注册请求
-  const registerData: loginForm = {
+  const registerData: registerForm = {
     username: ruleForm.name,
     password: ruleForm.password,
     email: ruleForm.email,
   }
   try {
-    const response: userResponseData =  await reqRegiter(registerData);
-    if (response) {
-          if (response.code === 200) {
-            alert('注册成功，请登录');
-            router.push('/login');
-          } else {
-            alert(response.msg);
-          }
-        } else {
-          console.error('未收到有效的响应');
-          alert('注册失败，请重试');
-        }
+    const response: userRegisterResponseData =  await reqRegiter(registerData);
+    if (response.code === 200) {
+      alert('注册成功，请登录');
+      router.push('/login');
+    } else {
+      alert(response.msg);
+    }
   } catch (error) {
       console.error('注册失败:', error);
       alert('注册失败，请重试');
-    }
+  }
         
 }
 </script>

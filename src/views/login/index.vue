@@ -47,10 +47,8 @@ import { reactive, ref, type Component } from 'vue'
 import { RowAlign, type FormInstance, type FormRules } from 'element-plus'
 import ValidCodeComponent from '@/components/validCode.vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
-import request from '@/utils/request'
-import type { loginForm, userResponseData } from '@/api/user/type'
-import { reqLogin } from '@/api/user'
+import type { loginForm, userLoginResponseData } from '@/api/user/login/type'
+import { reqLogin } from '@/api/user/login'
 
 
 interface RuleForm {
@@ -114,6 +112,7 @@ const loginHandler = async () => {
     }
   })
 
+  //注册申请
   const loginData: loginForm = {
     username: ruleForm.name,
     password: ruleForm.password,
@@ -121,9 +120,8 @@ const loginHandler = async () => {
   }
 
   try {
-    const response: userResponseData = await reqLogin(loginData);
+    const response: userLoginResponseData = await reqLogin(loginData);
     if (response.code === 200) {
-      // 验证验证码
       router.push('/')
       console.log(response.msg)
     } else {

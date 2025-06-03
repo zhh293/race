@@ -4,7 +4,19 @@ export interface aiChatForm {
     userId: number
 }
 
+export interface aiTableForm {
+    picture: string
+    userId: string
+}
+
 export interface aiResponseData {
-    code: number,
-    Respond: string
+    code: number
+    msg: string
+    data: {
+        Respond: string
+    }
+}
+
+export interface aiResponsePictureData {
+    
 }

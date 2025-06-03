@@ -57,7 +57,7 @@
                     </span>
 
                     <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                        <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
                         <el-avatar> user </el-avatar>
@@ -71,7 +71,7 @@
                     <div style="display: flex; margin-bottom: 2%; width: 100%;" v-show="isShow">
                         <span style="display: flex; width: 100%;">
                             <el-card style="display: flex; margin-left: auto; align-items: self-end;" v-model="userThing">
-                                <p style="display: flex; width: auto;">{{ userThing }}</p>
+                                <p style="display: flex; width: auto;">{{ userThing.question }}</p>
                             </el-card>
                             <el-avatar style="margin-left: 1%"> user </el-avatar>
                         </span>
@@ -117,14 +117,9 @@
 import { onMounted, ref, watch } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
-import axios from 'axios'
 import { reqAiChat } from '@/api/interface'
 import { useUserStore } from '@/stores/modules/user'
-
-// 获取用户状态
-const userStore = useUserStore()
-const userId = ref(userStore.userId)
+import { type aiChatForm } from '@/api/interface/type'
 
 
 //侧边栏开合
@@ -144,6 +139,11 @@ onMounted(() => {
   console.log(thisTimeState.value)
 })
 
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
+
 /*对话框写入部分*/
 const text = ref()
 const isShow = ref(false)
@@ -157,20 +157,28 @@ const handleEnter = (event: KeyboardEvent) => {
 }
 
 /*对话框交互部分*/
+// 获取用户状态
+const userStore = useUserStore()
+const userId = userStore.userId
+
 const backThing = ref()
-const userThing = ref()
+const userThing = ref<aiChatForm>({
+  question: text.value ?? '',
+  userId: userId ?? 1 // 默认用1或默认userId
+})
+
 watch(userThing, async (newValue) => {
   if (newValue && newValue.question.trim() && newValue.userId !== null) {
     backThing.value = '思考中...'
     try {
-      // 发送包含userId和问题的请求
+      // 请求
       const res = await reqAiChat({
         question: newValue.question,
         userId: newValue.userId
       })
       
       if (res.code === 200) {
-        backThing.value = res.Respond
+        backThing.value = res.data.Respond
       } else {
         ElMessage.error('请求失败，请稍后再试')
         backThing.value = '请求失败，请稍后再试'
@@ -182,6 +190,7 @@ watch(userThing, async (newValue) => {
     }
   }
 })
+
 const submitClick = (): void => {
   const inputValue = text.value.trim()
   if (!inputValue) {
@@ -192,7 +201,7 @@ const submitClick = (): void => {
   // 构造包含userId的请求数据
   userThing.value = {
     question: inputValue,
-    userId: userId.value
+    userId: userId ?? 1 // 保证userId为number类型
   }
   text.value = ''
   isShow.value = true

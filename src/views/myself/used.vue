@@ -98,6 +98,11 @@ onMounted(() => {
   console.log(thisTimeState.value)
 })
 
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
+
 
 </script>
 

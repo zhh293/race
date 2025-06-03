@@ -56,8 +56,8 @@
                         {{ thisTimeState }}
                     </span>
 
-                    <span @click="handleFullscreen" style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                    <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
+                        <span  @click="handleFullscreen"  style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
                         <el-avatar> user </el-avatar>
@@ -67,6 +67,9 @@
 
             <div style="display: flex; width: 100%; height: 100%; align-items: flex-end;">
                 <div style=" width: 80%; padding-bottom: 0; margin-bottom: 10%; height: 50%; margin-right: 10%;">
+
+                    
+                    
                     <el-input clearable v-model="text" type="textarea" 
                             style="display: flex; width: 100%; height: 30%; margin-bottom: 5%; border-width: 2px;" 
                             placeholder="来制定你的计划吧" 
@@ -96,8 +99,10 @@
 import { onMounted, ref } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
+import { useUserStore } from '@/stores/modules/user'
+import { type aiChatForm } from '@/api/interface/type' 
 
+/*侧边栏*/
   const isCollapse = ref(false)
   const handleOpen = (key: string, keyPath: string[]) => {
     console.log(key, keyPath)
@@ -129,18 +134,8 @@ const handleEnter = (event: KeyboardEvent) => {
 }
 
 const submitClick = () => {
-    if(text.value.trim() == 0) {
-        ElMessage.warning("请输入东西哦亲")
-    }else{
-
-    }
-
-
-
-
-    ElMessage.success("正在为您生成计划")
-} 
-
+  
+}
 
 </script>
 

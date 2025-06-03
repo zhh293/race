@@ -57,7 +57,7 @@
                     </span>
 
                     <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                        <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
                         <el-avatar> user </el-avatar>
@@ -113,6 +113,11 @@ onMounted(() => {
   thisTimeState.value = timeState || ''
   console.log(thisTimeState.value)
 })
+
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
 
 const text = ref()
 const handleEnter = (event: KeyboardEvent) => {
