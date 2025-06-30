@@ -2,6 +2,7 @@ import './assets/main.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import '@/assets/fonts/theFonts.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -17,15 +18,10 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 const pinia = createPinia()
 
+
 app.use(pinia)
 app.use(router)
 
 app.mount('#app')
-
-
-
-
-
-
 app.use(ElementPlus)
 

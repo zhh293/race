@@ -120,6 +120,7 @@ import { ElMessage } from 'element-plus'
 import { reqAiChat } from '@/api/interface'
 import { useUserStore } from '@/stores/modules/user'
 import { type aiChatForm } from '@/api/interface/type'
+import { useRouter } from 'vue-router'
 
 
 //侧边栏开合
@@ -148,63 +149,59 @@ const handleFullscreen = () => {
 const text = ref()
 const isShow = ref(false)
 const handleEnter = (event: KeyboardEvent) => {
-  // 如果按下Shift+Enter则插入换行
-  if (event.shiftKey) {
-    return
-  }
-  // 否则阻止默认行为（不换行）
+  if (event.shiftKey) return
   event.preventDefault()
+  submitClick() // 回车触发提交
 }
 
 /*对话框交互部分*/
 // 获取用户状态
 const userStore = useUserStore()
-const userId = userStore.userId
+const userId = userStore.userId.toString()
+const sessionId = userStore.sessionId
 
 const backThing = ref()
 const userThing = ref<aiChatForm>({
   question: text.value ?? '',
-  userId: userId ?? 1 // 默认用1或默认userId
+  userId: userId, // 默认用1或默认userId
+  sessionId: sessionId,
+  token: userStore.token
 })
 
-watch(userThing, async (newValue) => {
-  if (newValue && newValue.question.trim() && newValue.userId !== null) {
-    backThing.value = '思考中...'
-    try {
-      // 请求
-      const res = await reqAiChat({
-        question: newValue.question,
-        userId: newValue.userId
-      })
-      
-      if (res.code === 200) {
-        backThing.value = res.data.Respond
-      } else {
-        ElMessage.error('请求失败，请稍后再试')
-        backThing.value = '请求失败，请稍后再试'
-      }
-    } catch (error) {
-      console.error('请求错误:', error)
-      ElMessage.error('请求错误，请稍后再试')
-      backThing.value = '请求错误，请稍后再试'
-    }
-  }
-})
 
-const submitClick = (): void => {
+const submitClick = async (): Promise<void> => {
   const inputValue = text.value.trim()
   if (!inputValue) {
     ElMessage.warning('请输入内容')
     return
   }
-  
-  // 构造包含userId的请求数据
-  userThing.value = {
-    question: inputValue,
-    userId: userId ?? 1 // 保证userId为number类型
-  }
-  text.value = ''
+
   isShow.value = true
+  
+  try {
+    backThing.value = '思考中...'
+    userThing.value.question = inputValue // 更新用户输入内容
+    
+    const res = await reqAiChat({
+      question: inputValue,
+      userId: userId,
+      sessionId: sessionId,
+      token: userStore.token
+    })
+    
+    if (res.code === 200) {
+      backThing.value = res.data.Respond
+    } else {
+      ElMessage.error(res.msg || '请求失败，请稍后再试')
+      backThing.value = '请求失败，请稍后再试'
+    }
+  } catch (error) {
+    console.error('请求错误:', error)
+    ElMessage.error('请求错误，请稍后再试')
+    backThing.value = '请求错误，请稍后再试'
+  } finally {
+    text.value = ''
+  }
 }
 
 

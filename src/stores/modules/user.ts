@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
-import { reqRegiter } from '@/api/user/register'
+import { reqRegister } from '@/api/user/register'
 import { reqLogin } from '@/api/user/login'
 import { type registerForm, type userRegisterResponseData } from '@/api/user/register/type'
 import { type loginForm, type userLoginResponseData } from '@/api/user/login/type'
+import { reqAitable } from '@/api/interface'
+import { type aiTableForm, type aiResponsePictureData } from '@/api/interface/type'
 import { useRouter } from 'vue-router'
 import { ElNotification } from 'element-plus'
-
 
 // 定义用户状态类型
 interface UserState {
@@ -13,24 +14,73 @@ interface UserState {
   token: string
   username: string
   email: string
+  sessionId: string
+  generatedImages: UserImage[]
+  currentImage: UserImage | null
 }
 
-// 创建用户小仓库
+interface UserImage {
+  ossUrl: string
+  createdAt: number
+}
+
+// localStorage键名常量
+const STORAGE_KEYS = {
+  USER_ID: 'userId',
+  TOKEN: 'token',
+  USERNAME: 'username',
+  EMAIL: 'email',
+  SESSION_ID: 'sessionId',
+  GENERATED_IMAGES: 'generatedImages',
+  CURRENT_IMAGE: 'currentImage'
+}
+
 export const useUserStore = defineStore('user', {
-  // 小仓库数据
   state: (): UserState => ({
     userId: 0,
     token: '',
     username: '',
-    email: ''
+    email: '',
+    sessionId: '',
+    generatedImages: [],
+    currentImage: null
   }),
 
   actions: {
-    // 用户注册方法
+    /**
+     * 保存用户基本信息到localStorage
+     */
+    saveUserToLocalStorage() {
+      localStorage.setItem(STORAGE_KEYS.USER_ID, this.userId.toString())
+      localStorage.setItem(STORAGE_KEYS.TOKEN, this.token)
+      localStorage.setItem(STORAGE_KEYS.USERNAME, this.username)
+      localStorage.setItem(STORAGE_KEYS.EMAIL, this.email)
+      localStorage.setItem(STORAGE_KEYS.SESSION_ID, this.sessionId)
+    },
+
+    /**
+     * 从localStorage加载用户基本信息
+     */
+    loadUserFromLocalStorage() {
+      const userId = localStorage.getItem(STORAGE_KEYS.USER_ID)
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN)
+      const username = localStorage.getItem(STORAGE_KEYS.USERNAME)
+      const email = localStorage.getItem(STORAGE_KEYS.EMAIL)
+      const sessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID)
+
+      if (userId && token) {
+        this.userId = parseInt(userId)
+        this.token = token
+        this.username = username || ''
+        this.email = email || ''
+        this.sessionId = sessionId || ''
+      }
+    },
+
+        // 用户注册方法
     async userRegister(data: registerForm) {
       try {
-        const result:userRegisterResponseData = await reqRegiter(data)
-        console.log('Register response:', result)   //code,msg,注册成功请登录
+        const result: userRegisterResponseData = await reqRegister(data)
         
         if (result.code === 200) {
           ElNotification({
@@ -39,10 +89,7 @@ export const useUserStore = defineStore('user', {
             type: 'success',
             duration: 3000
           })
-          
-          const router = useRouter()
-          router.push('/login')
-
+          return true
         } else {
           ElNotification({
             title: '注册失败',
@@ -66,19 +113,17 @@ export const useUserStore = defineStore('user', {
     async userLogin(data: loginForm) {
       try {
         const result: userLoginResponseData = await reqLogin(data)
-        console.log('Login response:', result)
         
         if (result.code === 200) {
-          // 存储用户信息到状态
           this.userId = result.data.id
           this.email = result.data.email
           this.username = result.data.username
+          this.token = result.data.token
+          this.sessionId = result.data.sessionId
           
-          // 存储到本地存储，确保刷新后数据不丢失
-          localStorage.setItem('userId', result.data.id.toString())
-
-          const router = useRouter()
-          router.push('/')
+          // 使用新的方法保存用户信息
+          this.saveUserToLocalStorage()
+          this.loadImagesFromStorage()
 
           ElNotification({
             title: '登录成功',
@@ -86,7 +131,7 @@ export const useUserStore = defineStore('user', {
             type: 'success',
             duration: 3000
           })
-          
+          return true
         } else {
           ElNotification({
             title: '登录失败',
@@ -106,23 +151,127 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-
-    // 从本地存储初始化用户状态
+    // 初始化用户状态
     initUserState() {
-      const userId = localStorage.getItem('userId')
-      const token = localStorage.getItem('token')
-      if (userId && token) {
-        this.userId = parseInt(userId)
-        this.token = token
+      this.loadUserFromLocalStorage()
+      this.loadImagesFromStorage()
+    },
+
+    /**
+     * 从localStorage加载图片数据
+     */
+    loadImagesFromStorage() {
+      const imagesJson = localStorage.getItem(STORAGE_KEYS.GENERATED_IMAGES)
+      if (imagesJson) {
+        try {
+          this.generatedImages = JSON.parse(imagesJson)
+          this.generatedImages.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+        } catch (error) {
+          console.error('Failed to parse generated images:', error)
+          this.generatedImages = []
+        }
       }
+
+      const currentImageJson = localStorage.getItem(STORAGE_KEYS.CURRENT_IMAGE)
+      if (currentImageJson) {
+        try {
+          this.currentImage = JSON.parse(currentImageJson)
+        } catch (error) {
+          console.error('Failed to parse current image:', error)
+          this.currentImage = null
+        }
+      }
+    },
+
+    /**
+     * 保存图片数据到localStorage
+     */
+    saveImagesToStorage() {
+      localStorage.setItem(STORAGE_KEYS.GENERATED_IMAGES, JSON.stringify(this.generatedImages))
+      console.log('保存生成的图片到localStorage:', this.generatedImages)
+      localStorage.setItem(STORAGE_KEYS.CURRENT_IMAGE, JSON.stringify(this.currentImage))
+    },
+
+
+    // 生成图片方法
+    async generateImage(prompt: string) {
+      try {
+        const requestData: aiTableForm = {
+          picture: prompt,
+          userId: this.userId.toString(),
+          sessionId: this.sessionId,
+          token: this.token
+        }
+
+        const response: aiResponsePictureData = await reqAitable(requestData)
+        
+        if (response.code === 200 && response.data) {
+          const newImage: UserImage = {
+            ossUrl: response.data,
+            createdAt: Date.now()
+          }
+          
+          this.generatedImages.unshift(newImage)
+          this.currentImage = newImage
+          this.saveImagesToStorage()
+          
+          ElNotification({
+            title: '图片生成成功',
+            message: '已生成新图片',
+            type: 'success',
+            duration: 3000
+          })
+          
+          return newImage.ossUrl
+        } else {
+          throw new Error(response.msg || '图片生成失败')
+        }
+      } catch (error: any) {
+        ElNotification({
+          title: '生成失败',
+          message: error.message,
+          type: 'error',
+          duration: 3000
+        })
+        throw error
+      }
+    },
+
+    // 设置当前显示的图片
+    setCurrentImage(imageUrl: string) {
+      const image = this.generatedImages.find(img => img.ossUrl === imageUrl)
+      if (image) {
+        this.currentImage = image
+        localStorage.setItem(STORAGE_KEYS.CURRENT_IMAGE, JSON.stringify(image))
+      }
+    },
+
+    // 清除用户数据
+    clearUserData() {
+      this.$reset()
+      Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key))
     }
   },
 
-  //getters计算属性
   getters: {
-    //判断用户是否已登录
+    // 判断用户是否已登录
     isLoggedIn(): boolean {
-      return this.userId !== null && this.token !== null
+      return !!this.token && !!this.userId && !!this.username && !!this.email
+    },
+
+    // 获取当前用户的所有图片
+    allImages(): UserImage[] {
+      return this.generatedImages
+    },
+    
+    // 获取当前显示的图片
+    displayedImage(): string | undefined {
+      return this.currentImage?.ossUrl
+    },
+    
+    // 检查是否有生成记录
+    hasGeneratedImages(): boolean {
+      return this.generatedImages.length > 0
     }
   }
 })

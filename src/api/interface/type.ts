@@ -1,12 +1,16 @@
 //AI接口参数
 export interface aiChatForm {
     question: string,
-    userId: number
+    userId: string,
+    sessionId: string,
+    token: string
 }
 
 export interface aiTableForm {
     picture: string
     userId: string
+    sessionId: string
+    token: string
 }
 
 export interface aiResponseData {
@@ -18,5 +22,8 @@ export interface aiResponseData {
 }
 
 export interface aiResponsePictureData {
-    
+    code: number
+    msg: string
+    data: string
 }
+

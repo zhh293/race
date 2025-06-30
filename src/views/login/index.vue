@@ -1,160 +1,352 @@
 <template>
-    <div class="placeHolder" style="display: flex; height: 100vh; width: 100%; align-items: center; justify-items: center;">
-        <div class="imgPlaceHolder" style="display: flex; width: 500px; height: 50%; background-color: pink; border-radius: 10px; align-items: center; justify-content: center; justify-items: center; margin-left: 15%;">
-            <img src="@/assets/login.png" alt="login" style="display: flex; width: 98%; height: 98%; border-radius: 10px; align-items: center; justify-content: center; justify-items: center;"/>
+    <div class="login-container">
+        <div class="login-illustration">
+            <img src="@/assets/login.png" alt="login illustration" class="illustration-img"/>
         </div>
-        <div class="formPlaceHolder" style="display: flex; width: 500px; margin-right: 15%;">
+        <div class="login-form-container">
+            <div class="form-header">
+                <h2>欢迎登录</h2>
+                <p>请输入您的账号信息</p>
+            </div>
             <el-form
                 ref="ruleFormRef"
-                style="max-width: 600px"
+                class="login-form"
                 :model="ruleForm"
                 :rules="rules"
                 label-width="auto"
+                @keyup.enter="loginHandler"
             >
                 <el-form-item label="用户名" prop="name">
-                <el-input v-model="ruleForm.name"/>
+                    <el-input 
+                        v-model="ruleForm.name" 
+                        placeholder="3-16位字符"
+                        :prefix-icon="User"
+                    />
                 </el-form-item>
 
                 <el-form-item label="邮箱" prop="email">
-                <el-input v-model="ruleForm.email" type="email" autocomplete="off"/>
+                    <el-input 
+                        v-model="ruleForm.email" 
+                        type="email" 
+                        placeholder="请输入有效邮箱"
+                        :prefix-icon="Message"
+                    />
                 </el-form-item>
 
                 <el-form-item label="密码" prop="password">
-                <el-input v-model="ruleForm.password" type="password" autocomplete="off" show-password/>
+                    <el-input 
+                        v-model="ruleForm.password" 
+                        type="password" 
+                        show-password
+                        placeholder="6-16位密码"
+                        :prefix-icon="Lock"
+                    />
                 </el-form-item>
 
                 <el-form-item label="验证码" prop="validCode">
-                <el-input v-model="ruleForm.validCode"/> 
-                <ValidCodeComponent v-model="captcha" style="display: flex; background-color: paleturquoise; margin-top: 3px; margin-left: 70%;"/>
+                    <div class="captcha-wrapper">
+                        <el-input 
+                            v-model="ruleForm.validCode" 
+                            placeholder="请输入验证码"
+                            :prefix-icon="Key"
+                        />
+                        <ValidCode 
+                            v-model="captcha" 
+                            class="captcha-comp"
+                            @refresh="() => captcha = ''"
+                        />
+                    </div>
                 </el-form-item>
 
-                <div style="display: flex; margin-top: 8px; justify-content: center;">
-                  <el-button color="purple" type="primary"  plain round @click="loginHandler"> <div>登录</div> </el-button>
-                  <el-text tag="ins" shadow="hover" @click="registerHandler">还没有账号？点击注册</el-text>
+                <div class="action-buttons">
+                    <el-button 
+                        class="login-btn"
+                        :loading="isLogging"
+                        @click="loginHandler"
+                    >
+                        登 录
+                    </el-button>
+                    <div class="form-footer">
+                        <el-text tag="span" class="footer-text">还没有账号？</el-text>
+                        <el-text tag="ins" class="register-link" @click="registerHandler">立即注册</el-text>
+                    </div>
                 </div>            
-
             </el-form>
-
-
-         
-
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, type Component } from 'vue'
-import { RowAlign, type FormInstance, type FormRules } from 'element-plus'
-import ValidCodeComponent from '@/components/validCode.vue'
+import { reactive, ref } from 'vue'
+import type { FormInstance, FormRules } from 'element-plus'
 import { useRouter } from 'vue-router'
-import type { loginForm, userLoginResponseData } from '@/api/user/login/type'
-import { reqLogin } from '@/api/user/login'
+import { ElMessage } from 'element-plus'
+import { User, Lock, Message, Key } from '@element-plus/icons-vue'
+import type { loginForm } from '@/api/user/login/type'
+import { useUserStore } from '@/stores/modules/user'
+import ValidCode from '@/components/validCode.vue'
 
-
-interface RuleForm {
-  name: string
-  password: string
-  email: string
-  validCode: string
-}
-
+// 保持原有变量名称不变
 const ruleFormRef = ref<FormInstance>()
-const ruleForm = reactive<RuleForm>({
+const ruleForm = reactive({
   name: '',
   password: '',
   email: '',
-  validCode: '',
+  validCode: ''
 })
 const captcha = ref('')
+const isLogging = ref(false)
+const router = useRouter()
+const userStore = useUserStore()
 
+// 验证码验证规则
 const validCode = (rule: any, value: string, callback: any) => {
-  if (value === '') {
+  if (!value) {
     callback(new Error('请输入验证码'))
   } else if (value !== captcha.value) {
     callback(new Error('验证码错误'))
-    console.log(value, captcha.value)
+    captcha.value = '' // 验证错误时重置验证码
   } else {
     callback()
   }
 }
-const rules = reactive<FormRules<RuleForm>>({
+
+// 表单验证规则
+const rules = reactive<FormRules>({
   name: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' },
+    { min: 3, max: 16, message: '长度3-16个字符', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 16, message: 'Length should be 6 to 16', trigger: 'blur' },
+    { min: 6, max: 16, message: '长度6-16个字符', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
   validCode: [
-    {validator: validCode, trigger: 'blur'}
+    { validator: validCode, trigger: 'blur' }
   ]
 })
-
-
-const router = useRouter()
 
 const registerHandler = () => {
   router.push('/register')
 }
 
 const loginHandler = async () => {
-  if (!ruleFormRef.value) return
-
-  // 表单验证
-  await ruleFormRef.value.validate((valid) => {
-    if (!valid) {
-      console.log('验证失败')
-    }
-  })
-
-  //注册申请
-  const loginData: loginForm = {
-    username: ruleForm.name,
-    password: ruleForm.password,
-    email: ruleForm.email,
-  }
-
   try {
-    const response: userLoginResponseData = await reqLogin(loginData);
-    if (response.code === 200) {
+    await ruleFormRef.value?.validate()
+    isLogging.value = true
+
+    const loginForm: loginForm = {
+      username: ruleForm.name,
+      password: ruleForm.password,
+      email: ruleForm.email,
+    }
+    const flag = await userStore.userLogin(loginForm)
+    if(flag) {
       router.push('/')
-      console.log(response.msg)
-    } else {
-      alert('用户名或密码错误');
     }
   } catch (error) {
-    console.error('登录失败:', error);
-    alert('登录失败，请重试');
+    // 错误处理已在Pinia中完成，此处不需要重复
+  } finally {
+    isLogging.value = false
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.login-container {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  gap: 60px;
+}
+
+.login-illustration {
+  width: 500px;
+  height: 500px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
   }
 }
 
-</script>
+.illustration-img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.login-form-container {
+  width: 420px;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
   
-<style scoped>
-.imgPlaceHolder {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  &:hover {
+    transform: translateY(-5px);
+  }
 }
-.formPlaceHolder {
-  margin-left: 2px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
+  
+  h2 {
+    color: #303133;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  p {
+    color: #909399;
+    font-size: 14px;
+  }
+}
+
+.login-form {
+  width: 100%;
+  
+  :deep(.el-form-item__label) {
+    color: #606266;
+    font-weight: 500;
+  }
+  
+  :deep(.el-input__wrapper) {
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px #dcdfe6;
+    transition: all 0.3s;
+    
+    &:hover {
+      box-shadow: 0 0 0 1px #c0c4cc;
+    }
+    
+    &.is-focus {
+      box-shadow: 0 0 0 1px #7c3aed !important;
+    }
+  }
+}
+
+.captcha-wrapper {
   display: flex;
-  align-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  
+  :deep(.el-input) {
+    flex: 1;
+  }
+}
+
+.captcha-comp {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 44px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  height: 50%;
-  background-color: rgb(255, 213, 220);
+  gap: 8px;
 }
-.placeHolder {
-  background-color: bisque;
+
+.footer-text {
+  color: #909399;
+  font-size: 14px;
 }
-.el-form {
-  align-content: center;
+
+.register-link {
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s;
+  
+  &:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 992px) {
+  .login-container {
+    flex-direction: column;
+    gap: 40px;
+    padding: 40px 20px;
+  }
+  
+  .login-illustration {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    aspect-ratio: 1/1;
+  }
+  
+  .login-form-container {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-form-container {
+    padding: 30px 20px;
+  }
+  
+  .captcha-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .captcha-comp {
+    width: 100%;
+  }
 }
 </style>
-  

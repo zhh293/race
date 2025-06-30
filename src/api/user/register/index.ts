@@ -9,4 +9,4 @@ enum API{
 //对外暴露请求函数
 
 //注册用户信息接口方法
-export const reqRegiter = (data: registerForm) => request.post(API.REGISTER_URL, data) as Promise<userRegisterResponseData>;
+export const reqRegister = (data: registerForm) => request.post(API.REGISTER_URL, data) as Promise<userRegisterResponseData>;
