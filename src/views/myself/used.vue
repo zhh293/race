@@ -56,7 +56,7 @@
                                 <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                                     <el-icon><FullScreen /></el-icon>
                                 </span>
-                                <el-avatar> user </el-avatar>
+                                <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                             </span>      
                         </div>
                     </el-header>

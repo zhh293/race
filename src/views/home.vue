@@ -60,7 +60,7 @@
                         <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
-                        <el-avatar> user </el-avatar>
+                        <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                     </span>      
                 </div>
             </el-header>
@@ -107,6 +107,9 @@ import { onMounted, ref } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
 import { FullScreen, ChatRound, Mic, Memo, UserFilled } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/modules/user'
+
+const userStore = useUserStore()
 
   const isCollapse = ref(false)
   const handleOpen = (key: string, keyPath: string[]) => {

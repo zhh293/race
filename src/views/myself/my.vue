@@ -117,8 +117,8 @@ import { ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { useUserStore } from '@/stores/modules/user'
 import { ChatRound, Memo, UserFilled, FullScreen } from '@element-plus/icons-vue'
-import { reqUserShow, reqUserUpdate } from '@/api/user/show'
-import type { UserUpdateForm} from '@/api/user/show/type'
+import { reqUserShow, reqUserUpdate, reqUserUpload } from '@/api/user/show'
+import type { UserUpdateForm, UserUploadForm} from '@/api/user/show/type'
 import { onBeforeMount } from 'vue'
 import { useRealtimeLocationWS } from '@/utils/ws'
 import LocationMap from '@/components/LocationMap.vue'
@@ -188,12 +188,26 @@ const changeAdvater = async () => {
     if (!file) return
     
     try {
-      const form: UserUpdateForm = {
+      const form: UserUploadForm = {
         userId: id,
         file: file    
       }
-      const res = await reqUserUpdate(form)
+      const res = await reqUserUpload(form)
       imgUrl.value = res.data || '/5.png'
+    } catch (error) {
+      console.error('修改头像失败:', error)
+    }
+
+    try {
+      const form: UserUpdateForm = {
+        imageUrl: imgUrl.value
+      }
+      const res = await reqUserUpdate(form)
+      if (res.code === 200) {
+        ElMessage.success('头像修改成功')
+      } else {
+        ElMessage.error('头像修改失败')
+      }
     } catch (error) {
       console.error('修改头像失败:', error)
     }

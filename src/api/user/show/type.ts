@@ -9,13 +9,22 @@ export interface UserShowResponse {
     }
 }
 
-export interface UserUpdateForm {
+export interface UserUploadForm {
     userId: number
     file: File
 } 
 
-export interface UserUpdateResponse {
+export interface UserUploadResponse {
     code: number
     message: string
     data: string
+}
+
+export interface UserUpdateForm {
+    imageUrl: string
+}
+
+export interface UserUpdateResponse {
+    code: number
+    msg: string
 }

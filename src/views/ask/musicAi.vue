@@ -60,7 +60,7 @@
                         <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
-                        <el-avatar> user </el-avatar>
+                        <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                     </span>      
                 </div>
             </el-header>
@@ -195,6 +195,8 @@ const backThing = ref();
 const isShow = ref(false);
 const recordClick1 = async () => {
     ElMessage.success("开始录音")
+    isShow.value = false;
+    audioBlob.value = null
     // 这里可以添加录音逻辑
      try {
     const stream = await navigator.mediaDevices.getUserMedia({
