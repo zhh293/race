@@ -17,28 +17,22 @@ import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { useRealtimeLocationWS } from '@/utils/ws'
 
-interface Position {
-  lng: number
-  lat: number
-}
-
-const props = withDefaults(defineProps<{
-  userId: number
-  wsHost?: string
-  zoom?: number
-  loadingText?: string
-  showMarker?: boolean
-}>(), {
-  zoom: 15,
-  loadingText: '正在加载地图...',
-  showMarker: true,
-  wsHost: import.meta.env.VITE_WS_HOST || 'localhost:8080'
+const props = defineProps({
+  userId: {
+    type: Number,
+    required: true
+  },
+  wsHost: {
+    type: String,
+    default: 'localhost:8080'
+  },
+  loadingText: {
+    type: String,
+    default: '正在加载地图...'
+  }
 })
 
-const emit = defineEmits<{
-  (e: 'position-update', position: Position): void
-  (e: 'ws-message', message: any): void
-}>()
+const emit = defineEmits(['position-update', 'ws-message'])
 
 const mapContainer = ref<HTMLElement | null>(null)
 const loading = ref(true)
@@ -63,7 +57,7 @@ const loadAMapScript = (): Promise<void> => {
     }
     
     const script = document.createElement('script')
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${import.meta.env.VITE_AMAP_KEY || 'YOUR_AMAP_KEY'}`
+    script.src = 'https://webapi.amap.com/maps?v=2.0&key=5ee696eaddb2f84093a5721c8e505cf8'
     script.async = true
     
     script.onload = () => resolve()
@@ -83,17 +77,15 @@ const initMap = async (): Promise<void> => {
     }
 
     map = new AMap.Map(mapContainer.value, {
-      zoom: props.zoom,
-      center: [116.397428, 39.90923], // 默认天安门坐标
+      zoom: 15,
+      center: [116.397428, 39.90923],
       resizeEnable: true
     })
 
-    if (props.showMarker) {
-      marker = new AMap.Marker({
-        position: [116.397428, 39.90923],
-      })
-      map.add(marker)
-    }
+    marker = new AMap.Marker({
+      position: [116.397428, 39.90923],
+    })
+    map.add(marker)
 
     startWatchingLocation()
     loading.value = false
@@ -144,12 +136,6 @@ const cleanup = () => {
 
 onMounted(() => initMap())
 onBeforeUnmount(() => cleanup())
-
-// 暴露方法给父组件
-defineExpose({
-  getMap: () => map,
-  getMarker: () => marker
-})
 </script>
 
 <style scoped>

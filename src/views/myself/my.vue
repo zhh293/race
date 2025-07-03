@@ -85,7 +85,7 @@
                 <el-descriptions-item label="weatherImg">
                   <img :src="weatherImage" alt="天气图片" style="display: flex; width: 40%; height: 40%; justify-self: center;"/>
                 </el-descriptions-item>
-                <el-descriptions-item label="User ID">{{ id }}</el-descriptions-item>
+                <el-descriptions-item label="User ID">{{ userId }}</el-descriptions-item>
                 <el-descriptions-item label="Remarks">
                   <el-tag size="big" type="primary" @click="toggleTag('student')" v-show="tags.student">学生</el-tag>
                   <el-tag size="big" type="success" @click="toggleTag('worker')" v-show="tags.worker">上班族</el-tag>
@@ -174,6 +174,7 @@ const email = ref('')
 const userStore = useUserStore()
 const id = userStore.userId
 const weatherImage = ref('')
+const userId = ref()
 
 const imgUrl = ref("/5.png")
 const changeAdvater = async () => {
@@ -212,6 +213,26 @@ const handleWsMessage = (msg: any) => {
     ElMessage.success('位置上报成功')
   }
 }
+
+onMounted(async () => {
+      try {
+      const res = await reqUserShow(id.toString())
+      if(res.code === 200) {
+        username.value = res.data.username || '未设置用户名'
+        email.value = res.data.email || '未设置邮箱'
+        userId.value = id
+        weatherImage.value = res.data.weatherImageUrl || '/defaultWeather.png'
+        imgUrl.value = res.data.imageUrl || '/5.png'
+      } else {
+        console.error('获取用户信息失败:', res.message)
+      }
+    }catch
+      (error) {
+      console.error('修改头像失败:', error)
+    }finally {
+      console.log('用户信息加载完成')
+    }
+})
 </script>
 
 <style>
