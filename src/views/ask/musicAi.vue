@@ -281,12 +281,13 @@ const submitClick = async() => {
     formData.append('token', userStore.token || '');
 
     // 使用axios发送请求
+    const url = 'http://localhost:8080';
     const response = await axios.post(
-      'http://localhost:8080/wordAudio/handleAudioFile',
+      `${url}/wordAudio/handleAudioFile`,
+      formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-          formData,
         },
         timeout: 30000 
       }

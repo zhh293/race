@@ -61,12 +61,14 @@
             </el-header>
 
             <div>
+              
               <el-descriptions
                   title="个人信息"
                   direction="vertical"
                   border
-                  style="margin-top: 20px; margin-left: 0; width: 80%;"
+                  style="margin-top: 0; margin-left: 0; width: 80%;"
               >
+              
                 <el-descriptions-item
                     :rowspan="1"
                     :colspan="1"
@@ -75,10 +77,6 @@
                     align="center"
                 >
                   <img :src="imgUrl" alt="头像"style="width: 40%; height: 40%;"/>
-                  <el-button @click="changeAdvater" style="display: flex; width: 40%; height: 2%; font-size: smaller; justify-self: center;">
-                    <el-icon><UserFilled /></el-icon>
-                    修改头像
-                  </el-button>
                 </el-descriptions-item>
                 <el-descriptions-item label="Username">{{ username }}</el-descriptions-item>
                 <el-descriptions-item label="Email">{{ email }}</el-descriptions-item>
@@ -98,6 +96,10 @@
             <!-- <div class="tag-display">
               <p class="tag-text">FINDING YOU ARE {{ currentTags }}</p>
             </div> -->
+            <el-button @click="change" style="display: flex; width: 80%; height: 2%; font-size: smaller; margin-top: 2%;">
+              <el-icon><UserFilled /></el-icon>
+                    修改个人信息
+            </el-button>
 
             <div style="display: flex; height: 50%; width: 80%; justify-content: center; align-items: center; margin-top: 2%;">
                 <LocationMap 
@@ -122,6 +124,7 @@ import type { UserUpdateForm, UserUploadForm} from '@/api/user/show/type'
 import { onBeforeMount } from 'vue'
 import { useRealtimeLocationWS } from '@/utils/ws'
 import LocationMap from '@/components/LocationMap.vue'
+import router from '@/router'
 
 
 // 侧边栏状态
@@ -177,44 +180,8 @@ const weatherImage = ref('')
 const userId = ref()
 
 const imgUrl = ref("/5.png")
-const changeAdvater = async () => {
-  // 创建隐藏的文件输入元素
-  const fileInput = document.createElement('input')
-  fileInput.type = 'file'
-  fileInput.accept = 'image/*'
-  
-  fileInput.onchange = async (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-    
-    try {
-      const form: UserUploadForm = {
-        userId: id,
-        file: file    
-      }
-      const res = await reqUserUpload(form)
-      imgUrl.value = res.data || '/5.png'
-    } catch (error) {
-      console.error('修改头像失败:', error)
-    }
-
-    try {
-      const form: UserUpdateForm = {
-        imageUrl: imgUrl.value
-      }
-      const res = await reqUserUpdate(form)
-      if (res.code === 200) {
-        ElMessage.success('头像修改成功')
-      } else {
-        ElMessage.error('头像修改失败')
-      }
-    } catch (error) {
-      console.error('修改头像失败:', error)
-    }
-  }
-  
-  // 这行应该放在onchange回调函数外部
-  fileInput.click() 
+const change = () => {
+  router.push('/change')
 }
 
 const handlePositionUpdate = (pos: { lng: number; lat: number }) => {
@@ -236,7 +203,7 @@ onMounted(async () => {
         email.value = res.data.email || '未设置邮箱'
         userId.value = id
         weatherImage.value = res.data.weatherImageUrl || '/defaultWeather.png'
-        imgUrl.value = res.data.imageUrl || '/5.png'
+        imgUrl.value = res.data.avatarImageUrl || '/5.png'
       } else {
         console.error('获取用户信息失败:', res.message)
       }

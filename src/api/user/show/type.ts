@@ -4,7 +4,8 @@ export interface UserShowResponse {
     data: {
         username: string
         email: string
-        imageUrl: string
+        avatarImageUrl: string
+        password: string
         weatherImageUrl: string
     }
 }
@@ -21,7 +22,10 @@ export interface UserUploadResponse {
 }
 
 export interface UserUpdateForm {
-    imageUrl: string
+    username: string
+    password: string
+    email: string
+    avatarImageUrl: string
 }
 
 export interface UserUpdateResponse {
