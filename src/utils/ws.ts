@@ -12,6 +12,7 @@ export interface WebSocketResponse {
   trackId?: string
   status?: string
   recordTime?: string
+  remark?: string
 }
 
 export class RealtimeLocationWS {

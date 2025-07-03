@@ -9,4 +9,4 @@ enum API {
 
 export const reqLogin = (data: loginForm) => request.post(API.LOGIN_URL,data) as Promise<userLoginResponseData> 
 
-export const reqRecordGet = (id: number) => request.post(API.RECORD_URL, id) as Promise<userRecordResponseData>
+export const reqRecordGet = (id: number) => request.post(`${API.RECORD_URL}?userId=${id}`) as Promise<userRecordResponseData>

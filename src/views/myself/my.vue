@@ -119,10 +119,8 @@ import { ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { useUserStore } from '@/stores/modules/user'
 import { ChatRound, Memo, UserFilled, FullScreen } from '@element-plus/icons-vue'
-import { reqUserShow, reqUserUpdate, reqUserUpload } from '@/api/user/show'
-import type { UserUpdateForm, UserUploadForm} from '@/api/user/show/type'
-import { onBeforeMount } from 'vue'
-import { useRealtimeLocationWS } from '@/utils/ws'
+import { reqUserShow, reqUserUpdate, } from '@/api/user/show'
+import type { UserUpdateForm, } from '@/api/user/show/type'
 import LocationMap from '@/components/LocationMap.vue'
 import router from '@/router'
 
@@ -190,6 +188,7 @@ const handlePositionUpdate = (pos: { lng: number; lat: number }) => {
 
 const handleWsMessage = (msg: any) => {
   console.log('收到WS消息:', msg)
+  ElMessage.success(msg.remark)
   if (msg.status === 'success') {
     ElMessage.success('位置上报成功')
   }
@@ -207,8 +206,7 @@ onMounted(async () => {
       } else {
         console.error('获取用户信息失败:', res.message)
       }
-    }catch
-      (error) {
+    }catch(error) {
       console.error('修改头像失败:', error)
     }finally {
       console.log('用户信息加载完成')

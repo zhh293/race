@@ -133,7 +133,9 @@ import { ElMessage } from 'element-plus'
 import RecordRTC from 'recordrtc';
 import { useUserStore } from '@/stores/modules/user';
 import { useRouter } from 'vue-router'
-import axios from 'axios';
+import axios from 'axios'
+import { reqAiChat } from '@/api/interface'
+import type { aiChatForm } from '@/api/interface/type';
 
   const isCollapse = ref(false)
   const handleOpen = (key: string, keyPath: string[]) => {
@@ -294,7 +296,18 @@ const submitClick = async() => {
     )
     
     if (response.data.code === 200) {
-      backThing.value = response.data.result || '处理完成'
+      console.log(backThing.value) 
+      try {
+        const from: aiChatForm = {
+          question: response.data.result,
+          userId: userStore.userId.toString(),
+          sessionId: userStore.sessionId,
+          token: userStore.token
+        }
+        const res = await reqAiChat(from)
+        backThing.value = res.data.Respond
+      } catch (error) {}
+
       ElMessage.success("音频处理成功")
     } else {
       backThing.value = response.data.msg || '处理失败'

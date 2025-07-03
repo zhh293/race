@@ -98,8 +98,9 @@
 import { ref, computed, onMounted} from 'vue'
 import { getTimeState } from '@/utils'
 import { useUserStore } from '@/stores/modules/user'
-import { reqUserShow, reqUserUpdate, reqUserUpload } from '@/api/user/show'
-import type{ UserUpdateForm, UserUploadForm } from '@/api/user/show/type'
+import { reqUserShow, reqUserUpdate,} from '@/api/user/show'
+import type{ UserUpdateForm } from '@/api/user/show/type'
+import axios from 'axios'
 
 // 侧边栏状态
 const isCollapse = ref(false)
@@ -136,17 +137,22 @@ const changeAdvater = async () => {
     const file = (e.target as HTMLInputElement).files?.[0]
     if (!file) return
     
+    const url = 'http://localhost:8080'
+    const formdata = new FormData()
+    formdata.append('file', file)
+
     try {
-      const form: UserUploadForm = {
-        userId: userStore.userId,
-        file: file    
-      }
-      const res = await reqUserUpload(form)
-      console.log('头像上传结果:', res)
-      if(res.code === 200) {
-        console.log('头像上传成功')
-        avatarImageUrl.value = res.data
-      }
+        const res = await axios.post(
+            `${url}/common/upload`,
+            formdata,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        )
+        console.log(res.data.code)
+        avatarImageUrl.value = res.data.data
     } catch (error) {
       console.error('修改头像失败:', error)
     }
@@ -192,12 +198,10 @@ onMounted(async () => {
   try {
     const response = await reqUserShow(userStore.userId.toString())
     if(response.code === 200) {
-      
         userName.value = response.data.username,
         Email.value = response.data.email,
         password.value = response.data.password,
-        avatarImageUrl.value = response.data.avatarImageUrl
-      
+        avatarImageUrl.value = response.data.avatarImageUrl || '/5.png'  
     }
   } catch (error) {
     console.error('获取用户信息失败:', error)
