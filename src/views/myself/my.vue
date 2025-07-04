@@ -115,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount, nextTick, onActivated } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { useUserStore } from '@/stores/modules/user'
 import { ChatRound, Memo, UserFilled, FullScreen } from '@element-plus/icons-vue'
@@ -194,24 +194,24 @@ const handleWsMessage = (msg: any) => {
   }
 }
 
-onMounted(async () => {
-      try {
-      const res = await reqUserShow(id.toString())
-      if(res.code === 200) {
-        username.value = res.data.username || '未设置用户名'
-        email.value = res.data.email || '未设置邮箱'
-        userId.value = id
-        weatherImage.value = res.data.weatherImageUrl || '/defaultWeather.png'
-        imgUrl.value = res.data.avatarImageUrl || '/5.png'
-      } else {
-        console.error('获取用户信息失败:', res.message)
-      }
-    }catch(error) {
-      console.error('修改头像失败:', error)
-    }finally {
-      console.log('用户信息加载完成')
+const fetchUserData = async () => {
+  try {
+    const res = await reqUserShow(id.toString())
+    if(res.code === 200) {
+      username.value = res.data.username || '未设置用户名'
+      email.value = res.data.email || '未设置邮箱'
+      userId.value = id
+      weatherImage.value = res.data.weatherImageUrl || '/defaultWeather.png'
+      imgUrl.value = res.data.avatarImageUrl || '/5.png'
     }
-})
+  } catch(error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+
+onMounted(fetchUserData)
+
+onActivated(fetchUserData)
 </script>
 
 <style>

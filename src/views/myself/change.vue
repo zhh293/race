@@ -101,6 +101,8 @@ import { useUserStore } from '@/stores/modules/user'
 import { reqUserShow, reqUserUpdate,} from '@/api/user/show'
 import type{ UserUpdateForm } from '@/api/user/show/type'
 import axios from 'axios'
+import { onActivated } from 'vue'
+
 
 // 侧边栏状态
 const isCollapse = ref(false)
@@ -194,8 +196,7 @@ const update = async () => {
         }
 }
 
-
-onMounted(async () => {
+const fetchUserData = async () => {
   try {
     const response = await reqUserShow(userStore.userId.toString())
     if(response.code === 200) {
@@ -207,5 +208,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('获取用户信息失败:', error)
   }
-})
+}
+
+onMounted(fetchUserData)
+
+onActivated(fetchUserData)
 </script>
