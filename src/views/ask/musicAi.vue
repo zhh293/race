@@ -296,16 +296,18 @@ const submitClick = async() => {
     )
     
     if (response.data.code === 200) {
-      console.log(backThing.value) 
+      console.log(response.data.data)
       try {
         const from: aiChatForm = {
-          question: response.data.result,
+          question: response.data.data,
           userId: userStore.userId.toString(),
           sessionId: userStore.sessionId,
           token: userStore.token
         }
+
         const res = await reqAiChat(from)
         backThing.value = res.data.Respond
+        console.log(backThing.value)
       } catch (error) {}
 
       ElMessage.success("音频处理成功")

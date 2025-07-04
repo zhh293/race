@@ -165,6 +165,7 @@ const changeAdvater = async () => {
 const update = async () => {
     try {
             const form: UserUpdateForm = {
+                userId: userStore.userId,
                 username: userName.value,
                 email: Email.value,
                 password: password.value,

@@ -11,6 +11,7 @@ export interface UserShowResponse {
 }
 
 export interface UserUpdateForm {
+    userId: number
     username: string
     password: string
     email: string
