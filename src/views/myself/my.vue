@@ -1,8 +1,6 @@
 <template>
     <div class="common-layout" style="display: flex; height: 100vh; width: 100%;">
-        
       <el-container>
-
         <el-container>
           <el-aside width="25%">
             <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
@@ -44,63 +42,176 @@
                         <el-menu-item index="/used">使用情况</el-menu-item>
                     </el-menu-item-group>
                 </el-sub-menu>
-
             </el-menu>
-
           </el-aside>
 
           <el-main>
             <el-header style="font-size: larger;">
                 <div style="display: flex; width: 100%;">
                     <span style="display: flex; justify-content: center; width: 50%;">
-                        {{ thisTimeState }}
+                        {{ timeGreeting }}
                     </span>
-
                     <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                        <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
-                        <el-avatar> user </el-avatar>
+                        <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                     </span>      
                 </div>
             </el-header>
 
+            <div>
+              
+              <el-descriptions
+                  title="个人信息"
+                  direction="vertical"
+                  border
+                  style="margin-top: 0; margin-left: 0; width: 80%;"
+              >
+              
+                <el-descriptions-item
+                    :rowspan="1"
+                    :colspan="1"
+                    :width="240"
+                    label="Photo"
+                    align="center"
+                >
+                  <img :src="imgUrl" alt="头像"style="width: 40%; height: 40%;"/>
+                </el-descriptions-item>
+                <el-descriptions-item label="Username">{{ username }}</el-descriptions-item>
+                <el-descriptions-item label="Email">{{ email }}</el-descriptions-item>
+                <el-descriptions-item label="weatherImg">
+                  <img :src="weatherImage" alt="天气图片" style="display: flex; width: 40%; height: 40%; justify-self: center;"/>
+                </el-descriptions-item>
+                <el-descriptions-item label="User ID">{{ userId }}</el-descriptions-item>
+                <el-descriptions-item label="Remarks">
+                  <el-tag size="big" type="primary" @click="toggleTag('student')" v-show="tags.student">学生</el-tag>
+                  <el-tag size="big" type="success" @click="toggleTag('worker')" v-show="tags.worker">上班族</el-tag>
+                  <el-tag size="big" type="info" @click="toggleTag('retiree')" v-show="tags.retiree">退休族</el-tag>
+                  <el-tag type="warning" @click="resetTags" v-show="!allTagsVisible">点我重置</el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
+            </div>
 
+            <!-- <div class="tag-display">
+              <p class="tag-text">FINDING YOU ARE {{ currentTags }}</p>
+            </div> -->
+            <el-button @click="change" style="display: flex; width: 80%; height: 2%; font-size: smaller; margin-top: 2%;">
+              <el-icon><UserFilled /></el-icon>
+                    修改个人信息
+            </el-button>
 
-
-
+            <div style="display: flex; height: 50%; width: 80%; justify-content: center; align-items: center; margin-top: 2%;">
+                <LocationMap 
+                  :userId="id"
+                  @position-update="handlePositionUpdate"
+                  @ws-message="handleWsMessage"
+                />
+            </div>
           </el-main>
         </el-container>
-
       </el-container>
     </div>
 </template>
-  
+
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount, nextTick, onActivated } from 'vue'
 import { getTimeState } from '@/utils/index'
-import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/modules/user'
+import { ChatRound, Memo, UserFilled, FullScreen } from '@element-plus/icons-vue'
+import { reqUserShow, reqUserUpdate, } from '@/api/user/show'
+import type { UserUpdateForm, } from '@/api/user/show/type'
+import LocationMap from '@/components/LocationMap.vue'
 import router from '@/router'
 
-  const isCollapse = ref(false)
-  const handleOpen = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
-  }
-  const handleClose = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
-  }
 
-  /*时间问候*/
-const timeState = getTimeState()
-const thisTimeState = ref('')
-onMounted(() => {
-  thisTimeState.value = timeState || ''
-  console.log(thisTimeState.value)
+// 侧边栏状态
+const isCollapse = ref(false)
+const handleOpen = (key: string, keyPath: string[]) => {
+  console.log('Menu opened:', key, keyPath)
+}
+const handleClose = (key: string, keyPath: string[]) => {
+  console.log('Menu closed:', key, keyPath)
+}
+
+// 时间问候语
+const timeGreeting = computed(() => getTimeState() || '')
+
+// 全屏功能
+const handleFullscreen = () => {
+  document.documentElement.requestFullscreen().catch(err => {
+    console.error('全屏模式失败:', err)
+  })
+}
+
+// 用户标签状态
+const tags = ref({
+  student: true,
+  worker: true,
+  retiree: true
 })
 
+// 切换标签状态
+const toggleTag = (tag: keyof typeof tags.value) => {
+  tags.value[tag] = !tags.value[tag]
+}
 
+// 重置所有标签
+const resetTags = () => {
+  tags.value = {
+    student: true,
+    worker: true,
+    retiree: true
+  }
+}
 
+// 计算属性
+const allTagsVisible = computed(() => 
+  tags.value.student && tags.value.worker && tags.value.retiree
+)
 
+const username = ref('')
+const email = ref('')
+const userStore = useUserStore()
+const id = userStore.userId
+const weatherImage = ref('')
+const userId = ref()
+
+const imgUrl = ref("/5.png")
+const change = () => {
+  router.push('/change')
+}
+
+const handlePositionUpdate = (pos: { lng: number; lat: number }) => {
+  console.log('位置更新:', pos)
+}
+
+const handleWsMessage = (msg: any) => {
+  console.log('收到WS消息:', msg)
+  ElMessage.success(msg.remark)
+  if (msg.status === 'success') {
+    ElMessage.success('位置上报成功')
+  }
+}
+
+const fetchUserData = async () => {
+  try {
+    const res = await reqUserShow(id.toString())
+    if(res.code === 200) {
+      username.value = res.data.username || '未设置用户名'
+      email.value = res.data.email || '未设置邮箱'
+      userId.value = id
+      weatherImage.value = res.data.weatherImageUrl || '/defaultWeather.png'
+      imgUrl.value = res.data.avatarImageUrl || '/5.png'
+    }
+  } catch(error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+
+onMounted(fetchUserData)
+
+onActivated(fetchUserData)
 </script>
 
 <style>
@@ -109,13 +220,27 @@ onMounted(() => {
   min-height: 400px;
 }
 .el-menu-item-group__title {
-    height: 0;
-    width: 0;
+  height: 0;
+  width: 0;
 }
 .el-main {
-    margin-top: 0;
-    padding-top: 0.8%;
-    margin-left: 0;
-    padding-left: 0;
+  margin-top: 0;
+  padding-top: 0.8%;
+  margin-left: 0;
+  padding-left: 0;
+}
+.tag-display {
+  display: flex;
+  width: 80%;
+  height: 40%;
+  margin-top: 2%;
+  align-content: center;
+  justify-content: center;
+}
+.tag-text {
+  width: 100%;
+  text-align: center;
+  font-family: bigWord;
+  font-size: 6vh;
 }
 </style>

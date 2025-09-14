@@ -57,10 +57,10 @@
                     </span>
 
                     <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                        <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
-                        <el-avatar> user </el-avatar>
+                        <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                     </span>      
                 </div>
             </el-header>
@@ -71,7 +71,7 @@
                     <div style="display: flex; margin-bottom: 2%; width: 100%;" v-show="isShow">
                         <span style="display: flex; width: 100%;">
                             <el-card style="display: flex; margin-left: auto; align-items: self-end;" v-model="userThing">
-                                <p style="display: flex; width: auto;">{{ userThing }}</p>
+                                <p style="display: flex; width: auto;">{{ userThing.question }}</p>
                             </el-card>
                             <el-avatar style="margin-left: 1%"> user </el-avatar>
                         </span>
@@ -117,11 +117,11 @@
 import { onMounted, ref, watch } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
-import axios from 'axios'
 import { reqAiChat } from '@/api/interface'
+import { useUserStore } from '@/stores/modules/user'
+import { type aiChatForm } from '@/api/interface/type'
+import { useRouter } from 'vue-router'
 
-const baseURL = ''
 
 //侧边栏开合
 const isCollapse = ref(false)
@@ -140,50 +140,68 @@ onMounted(() => {
   console.log(thisTimeState.value)
 })
 
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
+
 /*对话框写入部分*/
 const text = ref()
 const isShow = ref(false)
 const handleEnter = (event: KeyboardEvent) => {
-  // 如果按下Shift+Enter则插入换行
-  if (event.shiftKey) {
-    return
-  }
-  // 否则阻止默认行为（不换行）
+  if (event.shiftKey) return
   event.preventDefault()
+  submitClick() // 回车触发提交
 }
 
 /*对话框交互部分*/
+// 获取用户状态
+const userStore = useUserStore()
+const userId = userStore.userId.toString()
+const sessionId = userStore.sessionId
+
 const backThing = ref()
-const userThing = ref()
-watch(userThing, async (newValue) => {
-  if (newValue.trim()) {
-    backThing.value = '思考中...'
-    backThing.value = await reqAiChat(newValue.trim())
-      .then((res) => {
-        if (res.code === 200) {
-          return res.Respond
-        } else {
-          ElMessage.error('请求失败，请稍后再试')
-          return '请求失败，请稍后再试'
-        }
-      })
-      .catch((error) => {
-        console.error('请求错误:', error)
-        ElMessage.error('请求错误，请稍后再试')
-        return '请求错误，请稍后再试'
-      })
-  }
+const userThing = ref<aiChatForm>({
+  question: text.value ?? '',
+  userId: userId, // 默认用1或默认userId
+  sessionId: sessionId,
+  token: userStore.token
 })
-const submitClick = (): void => {
+
+
+const submitClick = async (): Promise<void> => {
   const inputValue = text.value.trim()
   if (!inputValue) {
     ElMessage.warning('请输入内容')
     return
   }
-  
-  userThing.value = inputValue
-  text.value = ''
+
   isShow.value = true
+  
+  try {
+    backThing.value = '思考中...'
+    userThing.value.question = inputValue // 更新用户输入内容
+    
+    const res = await reqAiChat({
+      question: inputValue,
+      userId: userId,
+      sessionId: sessionId,
+      token: userStore.token
+    })
+    
+    if (res.code === 200) {
+      backThing.value = res.data.Respond
+    } else {
+      ElMessage.error(res.msg || '请求失败，请稍后再试')
+      backThing.value = '请求失败，请稍后再试'
+    }
+  } catch (error) {
+    console.error('请求错误:', error)
+    ElMessage.error('请求错误，请稍后再试')
+    backThing.value = '请求错误，请稍后再试'
+  } finally {
+    text.value = ''
+  }
 }
 
 

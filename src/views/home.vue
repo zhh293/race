@@ -57,24 +57,41 @@
                     </span>
 
                     <span style="display: flex; width: 50%; justify-items: right; justify-content: right;">
-                        <span style="display: flex; margin-right: 8%;">
+                        <span @click="handleFullscreen" style="display: flex; margin-right: 8%;">
                             <el-icon><FullScreen /></el-icon>
                         </span>
-                        <el-avatar> user </el-avatar>
+                        <el-avatar>{{ userStore.username || 'user' }}</el-avatar>
                     </span>      
                 </div>
             </el-header>
 
-            <el-carousel
-                height="600px"
-                direction="vertical"
-                type="card"
-                :autoplay="true"
-            >
-                <el-carousel-item v-for="key in item" :key="item">
-                <h3 text="2xl" justify="center">{{ key }}</h3>
-                </el-carousel-item>
-            </el-carousel>
+          <!-- 全新设计的轮播图 -->
+            <div class="carousel-container">
+                <el-carousel
+                    height="550px"
+                    direction="horizontal"
+                    type="card"
+                    :autoplay="true"
+                    :interval="5000"
+                    indicator-position="outside"
+                    arrow="always"
+                    @change="onCarouselChange"
+                >
+                    <el-carousel-item v-for="(item, index) in carouselItems" :key="index">
+                        <div class="custom-carousel-card" :class="{'active': currentIndex === index}">
+                            <div class="card-content">
+                                <div class="card-icon">
+                                    <el-icon :size="64" class="icon-element">
+                                        <component :is="item.icon" />
+                                    </el-icon>
+                                </div>
+                                <h3 class="card-title">{{ item.title }}</h3>
+                                <p class="card-desc">{{ item.desc }}</p>
+                            </div>
+                        </div>
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
 
 
 
@@ -89,6 +106,10 @@
 import { onMounted, ref } from 'vue'
 import { getTimeState } from '@/utils/index'
 import { ElMessage } from 'element-plus'
+import { FullScreen, ChatRound, Mic, Memo, UserFilled } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/modules/user'
+
+const userStore = useUserStore()
 
   const isCollapse = ref(false)
   const handleOpen = (key: string, keyPath: string[]) => {
@@ -106,14 +127,57 @@ onMounted(() => {
   console.log(thisTimeState.value)
 })
 
-const item = [
-    ['在蓝心小V里你可以问问AI该怎么制定计划'],
-    ["如果你不开心，你也可以在AI原子能力里面和AI聊天"],
-    ["如果你想听听音乐，也可以和AI探讨音乐世界的美丽，他也许会帮你制作哦"],
-    ["在我的计划里面你可以清楚的查看到每一次AI为你制定的计划，你也可以自定义"],
-    ["个人中心里面我们会为您统计您的计划安排和生活，有更加针对化的建议哦"]
-]
+ /*网页全屏*/
+const handleFullscreen = () => {
+    document.documentElement.requestFullscreen()
+}
 
+// 轮播图当前索引
+const currentIndex = ref(0)
+
+// 轮播图变更处理
+const onCarouselChange = (index: number) => {
+    currentIndex.value = index
+}
+
+// 优化后的轮播图数据结构（添加图标和背景色）
+const carouselItems = [
+    {
+        title: '蓝心小V - 智能计划助手',
+        desc: '问问AI如何制定科学计划，高效管理时间，提升工作学习效率。',
+        icon: ChatRound,
+        bgColor: '#f0f7ff',
+        textColor: '#3a7bd5'
+    },
+    {
+        title: 'AI原子能力 - 情感陪伴',
+        desc: '与AI聊天倾诉，获取情感支持和专业建议，让心情更舒畅。',
+        icon: ChatRound,
+        bgColor: '#f8f9fa',
+        textColor: '#5c6b77'
+    },
+    {
+        title: 'AI音乐实验室 - 创作无限',
+        desc: '探索音乐世界，AI不仅能推荐歌曲，还能帮你创作专属旋律。',
+        icon: Mic,
+        bgColor: '#fff6f0',
+        textColor: '#ff7a45'
+    },
+    {
+        title: '我的计划表 - 目标管理',
+        desc: '查看AI制定的计划，自定义编辑和跟踪进度，实现目标可视化。',
+        icon: Memo,
+        bgColor: '#f0fff4',
+        textColor: '#52c41a'
+    },
+    {
+        title: '个人中心 - 数据洞察',
+        desc: '查看计划统计和生活习惯分析，获取个性化建议，优化自我管理。',
+        icon: UserFilled,
+        bgColor: '#fcf6ff',
+        textColor: '#722ed1'
+    }
+]
 </script>
 
 <style>
@@ -131,14 +195,34 @@ const item = [
     margin-left: 0;
     padding-left: 0;
 }
-.el-carousel__item h3 {
-  color: #475669;
-  opacity: 0.80;
-  line-height: 300px;
-  margin: 0;
+
+/* 优化后的轮播图样式 */
+.el-carousel__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.carousel-content {
   text-align: center;
-  margin-left: 0;
-  padding-left: 0;
+  max-width: 800px;
+  width: 100%;
+}
+
+.carousel-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.carousel-desc {
+  font-size: 18px;
+  color: #666;
+  line-height: 1.6;
 }
 
 .el-carousel__item:nth-child(2n) {
@@ -147,5 +231,21 @@ const item = [
 
 .el-carousel__item:nth-child(2n + 1) {
   background-color: #d3dce6;
+}
+
+.blue-title {
+  color: #3a7bd5;
+}
+
+.blue-desc {
+  color: #4a88d9;
+}
+
+.gray-title {
+  color: #5c6b77;
+}
+
+.gray-desc {
+  color: #6d7a85;
 }
 </style>

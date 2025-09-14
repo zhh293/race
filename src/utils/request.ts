@@ -14,6 +14,7 @@ let request = axios.create({
 //添加请求与响应拦截器
 request.interceptors.request.use((config) => {
     //config配置对象有headers属性请求头，配置一些公共参数
+    
     //返回配置对象
     return config;
 })
@@ -58,5 +59,5 @@ request.interceptors.response.use(
         return Promise.reject(error);
     })
     
-    // 对外暴露
+// 对外暴露
 export default request;

@@ -8,6 +8,7 @@ import ChatAi from '@/views/ask/chatAi.vue'
 import MusicAi from '@/views/ask/musicAi.vue'
 import My from '@/views/myself/my.vue'
 import Used from '@/views/myself/used.vue'
+import Change from '@/views/myself/change.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,11 @@ const router = createRouter({
       path: '/used',
       name: 'used',
       component: Used,
+    },
+    {
+      path: '/change',
+      name: 'change',
+      component: Change
     }
   ]
 })
